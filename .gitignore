@@ -1,5 +1,5 @@
 .idea
 *.o
 *.sh
-testcases/*
+testcases1/*
 cmake-build-debug
