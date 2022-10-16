@@ -7,51 +7,67 @@
 #include <fstream>
 #include <map>
 #include<bits/stdc++.h>
-#include <cstring>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sstream>
+
 
 using namespace std;
 
-map<string, int> *process_file(char *fname) {
-    printf("Starting process.\n");
+string process_file(char *fname) {
     string dir = TESTCASES_DIR;
     ifstream f(dir + "/" + fname);
     string content;
     f >> content;
     f.close();
 
-    map<string, int> out;
+    map<string, int> pairs;
     char *tok = strtok((char *) content.c_str(), ",");
     while (tok != nullptr) {
-        auto pair = out.find(tok);
-        if (pair != out.end()) {
+        auto pair = pairs.find(tok);
+        if (pair != pairs.end()) {
             pair->second = pair->second + 1;
         } else
-            out.insert(make_pair(tok, 1));
+            pairs.insert(make_pair(tok, 1));
         tok = strtok(nullptr, ",");
     }
-    for (auto pair: out)
-        cout << pair.first << " " << pair.second << endl;
-    return nullptr;
+
+    string out;
+    for (auto pair: pairs)
+        out += pair.first + " " + to_string(pair.second) + "\n";
+
+    return out;
 }
 
 int main(int argc, char *argv[]) {
-//    printf("Now in map\n");
-    if (argc <= 2) {
-        perror("Not enough arguments given to map.c.");
+    if (argc < 2) {
+        perror("Not enough arguments given to map process.");
         exit(EXIT_FAILURE);
     }
     int fd0 = atoi(argv[0]);
     int fd1 = atoi(argv[1]);
-    char *pipe_name = argv[2];
 
 
     close(fd1);
-    char fname[MAX_FILENAME_LEN + 1] = {0};
-    read(fd0, fname, MAX_FILENAME_LEN + 1);
+    char tmp[MAX_FILENAME_LEN + 1] = {0};
+    read(fd0, tmp, MAX_FILENAME_LEN + 1);
     close(fd0);
 
-//    printf("Map file name: %s\n", fname);
-    process_file(fname);
+    char fname[MAX_FILENAME_LEN + 1] = {0};
+    char pipe_name[MAX_FILENAME_LEN + 1] = {0};
+
+    stringstream tmpstream(tmp);
+    tmpstream >> fname;
+    tmpstream >> pipe_name;
+
+    string processed_out = process_file(fname);
+
+    mkfifo(pipe_name, 0700);
+    int fd = open(pipe_name, O_WRONLY);
+    write(fd, processed_out.c_str(), processed_out.size() + 1);
+    close(fd);
 
     return 0;
 }
