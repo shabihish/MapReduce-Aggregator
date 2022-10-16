@@ -1,2 +1,2 @@
-# MapReduce-Counter
-Applies the Map-Reduce strategy and named/unnamed pipes for multiprocessed word counting and aggregation of several input files, and writes output to disk.
+# MapReduce-Aggregator
+Implements the Map-Reduce strategy and multiprocessing for aggregation of features from several input files. Uses named/unnamed pipes for intra-process message passing.
